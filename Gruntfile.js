@@ -2,12 +2,21 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
+
     concat: {
+      dist: {
+        src: [
+            'public/client/*.js',
+            'public/lib/*.js'
+        ],
+        dest: 'public/dist/app.js'
+      }
     },
 
     mochaTest: {
       test: {
         options: {
+          bail: true,
           reporter: 'spec'
         },
         src: ['test/**/*.js']
@@ -21,14 +30,19 @@ module.exports = function(grunt) {
     },
 
     uglify: {
+      statis_mappings: {
+        files: [
+          {src: 'public/dist/app.js', dest: 'public/dist/app.min.js' }
+        ]
+      }
     },
 
     jshint: {
       files: [
-        // Add filespec list here
+        'Gruntfile.js', 'public/dist/app.min.js'
       ],
       options: {
-        force: 'true',
+        force: 'false',
         jshintrc: '.jshintrc',
         ignores: [
           'public/lib/**/*.js',
@@ -38,6 +52,11 @@ module.exports = function(grunt) {
     },
 
     cssmin: {
+      target: {
+        files: [{
+          src: 'public/style.css', dest: 'public/dist/style.min.css'
+        }]
+      }
     },
 
     watch: {
@@ -90,7 +109,8 @@ module.exports = function(grunt) {
   ////////////////////////////////////////////////////
 
   grunt.registerTask('test', [
-    'mochaTest'
+    'mochaTest',
+    'jshint'
   ]);
 
   grunt.registerTask('build', [
@@ -99,6 +119,9 @@ module.exports = function(grunt) {
   grunt.registerTask('upload', function(n) {
     if(grunt.option('prod')) {
       // add your production server task here
+      ['concat',
+      'cssmin',
+      'uglify']
     } else {
       grunt.task.run([ 'server-dev' ]);
     }
@@ -106,6 +129,9 @@ module.exports = function(grunt) {
 
   grunt.registerTask('deploy', [
     // add your deploy tasks here
+    'concat',
+    'cssmin',
+    'uglify'
   ]);
 
 
