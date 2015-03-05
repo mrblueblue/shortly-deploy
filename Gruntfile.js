@@ -7,7 +7,6 @@ module.exports = function(grunt) {
       dist: {
         src: [
             'public/client/*.js',
-            'public/lib/*.js'
         ],
         dest: 'public/dist/app.js'
       }
