@@ -9,7 +9,7 @@ var userSchema = mongoose.Schema({
 
 var User = mongoose.model('User', userSchema);
 
-User.comparePassword = function(candidatePassword, savedPassword, cb) {
+User.methods.comparePassword = function(candidatePassword, savedPassword, cb) {
   bcrypt.compare(candidatePassword, savedPassword, function(err, isMatch) {
     if (err) return cb(err);
     cb(null, isMatch);
