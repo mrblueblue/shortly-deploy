@@ -6,26 +6,15 @@ module.exports = function(grunt) {
     concat: {
       dist: {
         src: [
-            'public/lib/underscore.js',
-            'public/lib/jquery.js',
-            'public/lib/backbone.js',
-            'public/lib/handlebars.js',
-            'public/client/app.js',
-            'public/client/link.js',
-            'public/client/links.js',
-            'public/client/linkView.js',
-            'public/client/linksView.js',
-            'public/client/createLinkView.js',
-            'public/client/router.js'
+            'public/client/**/*.js'
         ],
-        dest: 'public/dist/app.js'
+        dest: 'public/dist/<%= pkg.name %=>.js'
       }
     },
 
     mochaTest: {
       test: {
         options: {
-          bail: true,
           reporter: 'spec'
         },
         src: ['test/**/*.js']
@@ -39,24 +28,27 @@ module.exports = function(grunt) {
     },
 
     uglify: {
-      static_mappings: {
-        files: [
-          {
-            // src: 'public/lib/underscore.js', dest: 'public/dist/app.min.js' },
-            // src: 'public/lib/jquery.js', dest: 'public/dist/app.min.js' },
-            // src: 'public/lib/backbone.js', dest: 'public/dist/app.min.js' },
-            // src: 'public/lib/handlebars.js', dest: 'public/dist/app.min.js' },
-            src: 'public/dist/app.js', dest: 'public/dist/app.min.js' }
-        ]
+      options : {
+        banner: '/*! <%= pkg.name %> <%= grunt.template.today("dd-mm-yyyy") %> */\n'
+      },
+      dist: {
+        files: {
+          'public/dist/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>']
+        }
       }
     },
 
     jshint: {
       files: [
-        'Gruntfile.js', 'public/dist/app.min.js'
+        'Gruntfile.js', 
+        'app/**/*.js',
+        'public/**/*.js',
+        '/lib/**/*.js',
+        './*.js',
+        'spec/**/*.js'
       ],
       options: {
-        force: 'false',
+        force: 'true',
         jshintrc: '.jshintrc',
         ignores: [
           'public/lib/**/*.js',
@@ -92,6 +84,12 @@ module.exports = function(grunt) {
 
     shell: {
       prodServer: {
+        command: 'git push azure master',
+        options: {
+          stdout: true,
+          stderr: true,
+          failOnError: true
+        }
       }
     },
   });
@@ -128,8 +126,6 @@ module.exports = function(grunt) {
   ]);
 
   grunt.registerTask('build', [
-    'mochaTest',
-    'jshint',
     'concat',
     'cssmin',
     'uglify'
@@ -138,9 +134,7 @@ module.exports = function(grunt) {
   grunt.registerTask('upload', function(n) {
     if(grunt.option('prod')) {
       // add your production server task here
-      ['concat',
-      'cssmin',
-      'uglify']
+      grunt.task.run(['shell:prodServer']);
     } else {
       grunt.task.run([ 'server-dev' ]);
     }
@@ -148,9 +142,9 @@ module.exports = function(grunt) {
 
   grunt.registerTask('deploy', [
     // add your deploy tasks here
-    'concat',
-    'cssmin',
-    'uglify'
+    'test',
+    'build',
+    'upload'
   ]);
 
 
